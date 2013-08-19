@@ -12,6 +12,13 @@ Because draggables or scrolling takes too long
 How
 ---
 Currently using jQuery. CSS Transitions are being worked on.
+```html
+<script src="./libs/jquery-2.0.3.min.js"></script>
+<script src="./src/jquery.scroller.js"></script>
+<script>
+    $('#element').scroller();
+</script>
+```
 
 Who
 ---

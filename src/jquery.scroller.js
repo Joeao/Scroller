@@ -14,6 +14,7 @@
         stop:                           function(){},
         step:                           function(){},
         showDebugging:                  false,
+        duration:                       250,                                    // Lower is quicker
         //useCSSTranslation:            false,                                  // TRUE NOT SAFE Default false until tested 
         startEvents:                    'mousedown',
         stopEvents:                     'mouseup'
@@ -106,10 +107,6 @@
             }
             var scrollTo = self.calculatePosition(startPosition, movePosition);
             self.animate(scrollTo);
-
-            if(this.options.showDebugging) {
-                self.$body.find('#scroller-debugging').text("X:" + scrollTo.x + " - Y:" + scrollTo.y + " - N:" + scrollTo.n);
-            }
         }
     };
 
@@ -174,8 +171,6 @@
             y: self.$el[0].clientHeight
         }
 
-        console.log(frame, topLeft)
-
         var n; // Distance between both clicks
         
         // Calculate position to scroll towards
@@ -203,10 +198,11 @@
     };
 
     Scroller.prototype.animate = function(scrollTo) {
+        var self = this;
         // Scroll with jQuery
         if(this.cssTranslate) {
              // Scroll with CSS
-            var string = "all " + Math.round(scrollTo.n * 250) + "ms linear";
+            var string = "all " + Math.round(scrollTo.n * self.options.duration) + "ms linear";
 
             this.$el.css({
                 left: -scrollTo.x,
@@ -222,8 +218,13 @@
                 left: -scrollTo.x,
                 top: -scrollTo.y
             }, {
-                step: this.options.step(),
-                duration: scrollTo.n * 250,
+                step: function() {
+                    self.options.step();
+                    if(self.options.showDebugging) {
+                        self.$body.find('#scroller-debugging').text("Left:" + -self.$el[0].offsetLeft + "; Top:" + -self.$el[0].offsetTop + "; N:" + (scrollTo.n).toFixed(4));
+                    }
+                },
+                duration: scrollTo.n * self.options.duration,
                 easing: 'linear'
             });
         }

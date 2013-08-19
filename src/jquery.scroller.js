@@ -245,9 +245,9 @@
         }
     };
 
-    //  cssAnimationsSupported():
-    //    returns true if the browser supports CSS animations
-    //    which are used for easing..
+    /**
+     * Taken from https://github.com/briangonzalez/jquery.pep.js
+    **/
     Scroller.prototype.cssAnimationsSupported = function() {
 
         if ( typeof(this.cssAnimationsSupport) !== "undefined" ){
@@ -290,12 +290,10 @@
           if (!$.data(this, 'plugin_' + pluginName)) {
             var scrollerObj = new Scroller( this, options );
             $.data(this, 'plugin_' + pluginName, scrollerObj);
-            $.scroller.elems.push(scrollerObj);
           }
         });
     };
 
     $.scroller = {};
-    $.scroller.elems = [];
 
 }(jQuery, window));

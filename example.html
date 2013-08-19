@@ -1,0 +1,54 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Scroller Example</title>
+
+    <script src="./libs/jquery-2.0.3.min.js"></script>
+    <script src="./src/jquery.scroller.js"></script>
+    <style>
+        * {
+            margin:0;
+            padding:0;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            user-select:none;
+            -ms-user-select: none;
+        }
+        body {
+            overflow:hidden;
+        }
+        #text {
+            position: fixed;
+            font-size:22px;
+            font-weight:100;
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            top:10px;
+            left:10px;
+            z-index:2;
+        }
+        #big-element {
+            width:10000px;
+            height:5000px;
+            left:-4500px;
+            top:-2500px;
+            position: absolute;
+            background-image:url(./escheresque.png);
+        }
+    </style>
+</head>
+<body>
+    <p id="text">Scroll with Double Click - Debug Active</p>
+    <div id="big-element">
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#big-element').scroller({
+                startEvents: 'dblclick',
+                showDebugging: true
+            });
+        });
+    </script>
+</body>
+</html>

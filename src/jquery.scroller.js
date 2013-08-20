@@ -9,11 +9,12 @@
     var pluginName = 'scroller';
     var defaults   = {
         // Options                       
-        initiate:                       function(){},
-        start:                          function(){},                                
+        initiate:                       function(){},                           // Happens when startTrigger is called
+        start:                          function(){},                           // Happens when first move is made
         stop:                           function(){},
         step:                           function(){},
         showDebugging:                  false,
+        triggerOnChild:                 false,                                  // If false, trigger won't be called on child
         duration:                       250,                                    // Lower is quicker
         //useCSSTranslation:            false,                                  // TRUE NOT SAFE Default false until tested 
         startEvents:                    'mousedown',
@@ -38,17 +39,18 @@
 
         // store document/body so we don't need to keep grabbing them
         // throughout the code
+        this.$window = $(window);
         this.$document  = $(this.$el[0].ownerDocument);
         this.$body      = this.$document.find('body');
 
-        this.cssTranslate = this.options.useCSSTranslation && this.cssAnimationsSupported ? true : false;
+        // this.cssTranslate = this.options.useCSSTranslation && this.cssAnimationsSupported ? true : false;
 
         //  Create our triggers based on touch/click device 
         this.moveTrigger = 'mousemove';
         this.startTrigger = this.options.startEvents;
         this.stopTrigger  = this.options.stopEvents;
 
-        this.started        = false;
+        this.started = false;
 
         this.init();
     }
@@ -58,7 +60,13 @@
         var self = this;
         // Subscribe to our start event 
         self.$el.bind( self.startTrigger, function(ev){
-          self.handleStart(ev);
+            if(! self.options.triggerOnChild) {
+                if($(ev.target).is(self.$el)) {
+                    self.handleStart(ev);
+                }
+            } else {
+                self.handleStart(ev);
+            }            
         });
 
         // Subscribe to our stop event
@@ -87,11 +95,13 @@
             y: e.clientY
         }
 
-        self.$document.one( self.moveTrigger, function() {
-            self.options.initiate();
+        self.options.start(e);
+
+        self.$el.one( self.moveTrigger, function(e) {
+            self.options.initiate(e);
         });
 
-        self.$document.bind( self.moveTrigger, function(ev){
+        self.$el.bind( self.moveTrigger, function(ev){
           self.handleMove(startPosition, ev);
         });
     };
@@ -116,7 +126,7 @@
         if(this.started) {
             var self = this;
             // fire user's stop event.
-            self.options.stop.call(this, e, this);
+            self.options.stop(e);
 
             // this must be set to false after 
             // the user's stop event is called, so the dev
@@ -125,7 +135,7 @@
 
             self.stopAnimate();
 
-            self.$document.unbind(this.moveTrigger);
+            self.$el.unbind(this.moveTrigger);
 
             if(self.options.showDebugging) {
                 self.$body.find('#scroller-debugging').text('');
@@ -142,8 +152,8 @@
 
         // Define Variables
         var frame = { // x0,y0
-            x: self.$body[0].clientWidth,
-            y: self.$body[0].clientHeight
+            x: self.$window.width(),
+            y: self.$window.height()
         }
 
         var topLeft = { // Ξ0,η0
@@ -199,91 +209,47 @@
 
     Scroller.prototype.animate = function(scrollTo) {
         var self = this;
-        // Scroll with jQuery
-        if(this.cssTranslate) {
-             // Scroll with CSS
-            var string = "all " + Math.round(scrollTo.n * self.options.duration) + "ms linear";
+        /* CSS Translation
+        var string = "all " + Math.round(scrollTo.n * self.options.duration) + "ms linear";
 
-            this.$el.css({
-                left: -scrollTo.x,
-                top: -scrollTo.y,
-                '-webkit-transition': string,
-                '-moz-transition': string,
-                '-ms-transition': string,
-                '-o-transition': string,
-                'transition': string
-            });
-        } else {
-            this.$el.stop(true, false).animate({
-                left: -scrollTo.x,
-                top: -scrollTo.y
-            }, {
-                step: function() {
-                    self.options.step();
-                    if(self.options.showDebugging) {
-                        self.$body.find('#scroller-debugging').text("Left:" + -self.$el[0].offsetLeft + "; Top:" + -self.$el[0].offsetTop + "; N:" + (scrollTo.n).toFixed(4));
-                    }
-                },
-                duration: scrollTo.n * self.options.duration,
-                easing: 'linear'
-            });
-        }
+        this.$el.css({
+            left: -scrollTo.x,
+            top: -scrollTo.y,
+            '-webkit-transition': string,
+            '-moz-transition': string,
+            '-ms-transition': string,
+            '-o-transition': string,
+            'transition': string
+        });*/
+
+        this.$el.stop(true, false).animate({
+            left: -scrollTo.x,
+            top: -scrollTo.y
+        }, {
+            step: function() {
+                self.options.step();
+                if(self.options.showDebugging) {
+                    self.$body.find('#scroller-debugging').text("Left:" + -self.$el[0].offsetLeft + "; Top:" + -self.$el[0].offsetTop + "; N:" + (scrollTo.n).toFixed(4));
+                }
+            },
+            duration: scrollTo.n * self.options.duration,
+            easing: 'linear'
+        });
     };
 
     Scroller.prototype.stopAnimate = function() {
-        if(this.cssTranslate) {
-            this.$el.css({
-                left: -this.$el[0].offsetLeft,
-                top: -this.$el[0].offsetTop,
-                '-webkit-transition': '',
-                '-moz-transition': '',
-                '-ms-transition': '',
-                '-o-transition': '',
-                'transition': ''
-            });
-        } else {
-            this.$el.stop();
-        }
-    };
+        /* CSS Translation
+        this.$el.css({
+            left: -this.$el[0].offsetLeft,
+            top: -this.$el[0].offsetTop,
+            '-webkit-transition': '',
+            '-moz-transition': '',
+            '-ms-transition': '',
+            '-o-transition': '',
+            'transition': ''
+        });*/
 
-    /**
-     * Taken from https://github.com/briangonzalez/jquery.pep.js
-    **/
-    Scroller.prototype.cssAnimationsSupported = function() {
-
-        if ( typeof(this.cssAnimationsSupport) !== "undefined" ){
-          return this.cssAnimationsSupport;
-        }
-
-        // If the page has Modernizr, let them do the heavy lifting.
-        if ( ( typeof(Modernizr) !== "undefined" && Modernizr.cssanimations) ){
-          this.cssAnimationsSupport = true;
-          return true;
-        }
-
-        var animation = false,
-            elm = document.createElement('div'),
-            animationstring = 'animation',
-            keyframeprefix = '',
-            domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-            pfx  = '';
-
-        if( elm.style.animationName ) { animation = true; }    
-         
-        if( animation === false ) {
-          for( var i = 0; i < domPrefixes.length; i++ ) {
-            if( elm.style[ domPrefixes[i] + 'AnimationName' ] !== undefined ) {
-              pfx = domPrefixes[ i ];
-              animationstring = pfx + 'Animation';
-              keyframeprefix = '-' + pfx.toLowerCase() + '-';
-              animation = true;
-              break;
-            }
-          }
-        }
-
-        this.cssAnimationsSupport = animation;
-        return animation;
+        this.$el.stop();
     };
 
     $.fn[pluginName] = function ( options ) {

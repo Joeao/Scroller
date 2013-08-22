@@ -45,6 +45,7 @@ Todo
 - [ ] Enable drawCursor by default, disabling if not supported. <a target="_blank" href="http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x">http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x</a>
 - [ ] Find out why drawCursor isn't so smooth
 - [ ] Make Readme better
+- [ ] Instead of drawing an arrow and hiding the cursor, find a way to bring in an arrow image as the cursor and rotate it. Research.
 
 Licence
 -------

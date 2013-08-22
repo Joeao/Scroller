@@ -8,7 +8,7 @@ Why
 ---
 Because draggables or scrolling takes too long on big elements.
 
-<a href="http://www.space.com/15830-light-speed.html">Why "C" Scroll?</a>
+<a target="_blank" href="http://www.space.com/15830-light-speed.html">Why "C" Scroll?</a>
 
 How
 ---
@@ -21,6 +21,11 @@ Apply like this:
     $('#element').cScroll();
 </script>
 ```
+
+Usage
+-----
+
+
 
 Explain
 -----
@@ -39,3 +44,8 @@ Todo
 - [ ] Handle edge of wall better
 - [ ] Enable drawCursor by default, disabling if not supported. <a target="_blank" href="http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x">http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x</a>
 - [ ] Find out why drawCursor isn't so smooth
+
+Licence
+-------
+
+cScroll is licenced under the <a target="_blank" href="http://www.wtfpl.net/">WTFPL</a>.

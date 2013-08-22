@@ -1,18 +1,19 @@
 /**      
- * Scroller by JoeAO
+ * cScroll by JoeAO
 **/
 ;(function ( $, window, undefined ) {
 
     "use strict";
 
     //  create the defaults once
-    var pluginName = 'scroller';
+    var pluginName = 'cScroll';
     var defaults   = {
         // Options                       
         initiate:                       function(){},                           // Happens when startTrigger is called
         start:                          function(){},                           // Happens when first move is made
         stop:                           function(){},
         step:                           function(){},
+        drawCursor:                     false,                                  // NOT SAFE FOR IE<=8 Draws a cursor on the screen. User can style #cscroll-pointer
         showDebugging:                  false,
         triggerOnChild:                 false,                                  // If false, trigger won't be called on child
         duration:                       250,                                    // Lower is quicker
@@ -24,7 +25,7 @@
    /**
     * Main Object
    **/
-    function Scroller( el, options ) {
+    function cScroll( el, options ) {
 
         this.name = pluginName;
 
@@ -43,6 +44,12 @@
         this.$document  = $(this.$el[0].ownerDocument);
         this.$body      = this.$document.find('body');
 
+        // drawCursor set to false if IE >= 8
+        /* Currently bugged in latest version of jQuery 2.x, will uncomment and default to true when fixed
+        if (! $.support.leadingWhitespace) {
+            this.options.drawCursor = false;
+        }*/
+
         // this.cssTranslate = this.options.useCSSTranslation && this.cssAnimationsSupported ? true : false;
 
         //  Create our triggers based on touch/click device 
@@ -56,7 +63,7 @@
     }
 
     //  init();
-    Scroller.prototype.init = function () {
+    cScroll.prototype.init = function () {
         var self = this;
         // Subscribe to our start event 
         self.$el.bind( self.startTrigger, function(ev){
@@ -85,7 +92,7 @@
     * Finds start position based on event
     * Binds move event and initial event
     **/
-    Scroller.prototype.handleStart = function(e) {
+    cScroll.prototype.handleStart = function(e) {
         var self = this;
 
         self.started = true;
@@ -98,6 +105,11 @@
         self.options.start(e);
 
         self.$el.one( self.moveTrigger, function(e) {
+            if(self.options.drawCursor) {
+                $('body').css('cursor', 'none');
+                $('body').append("<div id='cscroll-cursor-box'></div>");
+                $('#cscroll-cursor-box').append("<p id='cScroll-pointer' style='position:fixed; font-size:44px; font-family: Arial, Helvetica, sans-serif; left:" + (e.clientX - 22) + "px; top:" + (e.clientY - 22) + "px;'>V</p>");
+            }
             self.options.initiate(e);
         });
 
@@ -106,9 +118,9 @@
         });
     };
 
-  //  handleMove();
-  //    the logic for when the move events occur 
-    Scroller.prototype.handleMove = function(startPosition, e) {
+    //  handleMove();
+    //    the logic for when the move event occurs
+    cScroll.prototype.handleMove = function(startPosition, e) {
         if(this.started) {
             var self = this;
             var movePosition = {
@@ -117,12 +129,34 @@
             }
             var scrollTo = self.calculatePosition(startPosition, movePosition);
             self.animate(scrollTo);
+
+            if(self.options.drawCursor) {
+                var angle = self.calculateAngle(startPosition, movePosition);
+
+                var rotate = 'rotate(-' + angle + 'deg)';
+                var translate = 'translateX(' + (movePosition.x - startPosition.x) + 'px) translateY(' + (movePosition.y - startPosition.y) + 'px)';
+
+                // According to http://caniuse.com/transform, only need -ms-, -webkit- and non-prefixed
+                // Moves box
+                $('body #cscroll-cursor-box').css({
+                    '-webkit-transform': translate,
+                    '-ms-transform': translate,
+                    'transform': translate
+                });
+
+                // Moves cursor rotation
+                $('body #cScroll-pointer').css({
+                    '-webkit-transform': rotate,
+                    '-ms-transform': rotate,
+                    'transform': rotate
+                });
+            }
         }
     };
 
     //  handleStop();
     //    the logic for when the stop events occur
-    Scroller.prototype.handleStop = function(e) {
+    cScroll.prototype.handleStop = function(e) {
         if(this.started) {
             var self = this;
             // fire user's stop event.
@@ -140,10 +174,14 @@
             if(self.options.showDebugging) {
                 self.$body.find('#scroller-debugging').text('');
             }
+
+            $('body #cscroll-cursor-box').remove();
+
+            $('body').css('cursor', '');
         }
     };
 
-    Scroller.prototype.calculatePosition = function(first, second) {
+    cScroll.prototype.calculatePosition = function(first, second) {
         var self = this;
         /**
          * @todo: turn if else into case
@@ -207,7 +245,15 @@
         return scrollTo;
     };
 
-    Scroller.prototype.animate = function(scrollTo) {
+    // Calculates the angle to get second point facing away from the first point
+    cScroll.prototype.calculateAngle = function(first, second) {
+        // Arrow is represented by a V
+        var angle = Math.atan2(second.x - first.x, second.y - first.y) * 180 / Math.PI + 360;
+
+        return angle;
+    };
+
+    cScroll.prototype.animate = function(scrollTo) {
         var self = this;
         /* CSS Translation
         var string = "all " + Math.round(scrollTo.n * self.options.duration) + "ms linear";
@@ -237,7 +283,7 @@
         });
     };
 
-    Scroller.prototype.stopAnimate = function() {
+    cScroll.prototype.stopAnimate = function() {
         /* CSS Translation
         this.$el.css({
             left: -this.$el[0].offsetLeft,
@@ -255,12 +301,12 @@
     $.fn[pluginName] = function ( options ) {
         return this.each(function () {
           if (!$.data(this, 'plugin_' + pluginName)) {
-            var scrollerObj = new Scroller( this, options );
+            var scrollerObj = new cScroll( this, options );
             $.data(this, 'plugin_' + pluginName, scrollerObj);
           }
         });
     };
 
-    $.scroller = {};
+    $.cScroll = {};
 
 }(jQuery, window));

@@ -79,7 +79,9 @@
                     self.handleStart(ev);
                 }
             } else {
-                self.handleStart(ev);
+                self.$el.bind( self.moveTrigger, function(ev) {
+                    self.handleMove(startPosition, ev);
+                });
             }            
         });
 

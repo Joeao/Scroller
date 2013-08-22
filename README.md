@@ -25,7 +25,7 @@ Apply like this:
 Usage
 -----
 
-
+(Todo)
 
 Explain
 -----
@@ -44,6 +44,7 @@ Todo
 - [ ] Handle edge of wall better
 - [ ] Enable drawCursor by default, disabling if not supported. <a target="_blank" href="http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x">http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x</a>
 - [ ] Find out why drawCursor isn't so smooth
+- [ ] Make Readme better
 
 Licence
 -------

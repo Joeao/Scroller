@@ -48,6 +48,7 @@
 
         // drawCursor set to false if IE >= 8
         /* Currently bugged in latest version of jQuery 2.x, will uncomment and default to true when fixed
+        http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x
         if (! $.support.leadingWhitespace) {
             this.options.drawCursor = false;
         }*/
@@ -55,8 +56,6 @@
         if($.throttle == undefined) {
             this.options.throttle = false;
         }
-
-        $('body').mousemove();
 
         // this.cssTranslate = this.options.useCSSTranslation && this.cssAnimationsSupported ? true : false;
 
@@ -120,7 +119,7 @@
             }
             self.options.initiate(e);
         });
-        if($.throttle) {
+        if(self.options.thottle) {
             self.$el.bind( self.moveTrigger, $.throttle(self.options.throttleLimit, true, function(ev) {
                 self.handleMove(startPosition, ev);
             }));

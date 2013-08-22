@@ -7,6 +7,7 @@ cScroll provides a different method of scrolling using jQuery. You may have seen
 Why
 ---
 Because draggables or scrolling takes too long on big elements.
+<a href="http://www.space.com/15830-light-speed.html">Why "C" Scroll?</a> And because coming up with names is hard. 
 
 How
 ---

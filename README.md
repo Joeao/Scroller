@@ -2,7 +2,7 @@ cScroll
 =============
 cScroll provides a different method of scrolling using jQuery. You may have seen this kind of scrolling clicking the middle-mouse button in an application with overflow X and Y.
 
-<a target="_blank" href="cScroll.joeao.co.uk">Demo</a>
+<a target="_blank" href="http://cScroll.joeao.co.uk">Demo</a>
 
 Why
 ---
@@ -35,4 +35,4 @@ Math Expertise: Peter Straka - http://scholar.google.com.au/citations?user=BV5Pk
 Todo
 ----
 - [ ] Handle edge of wall better
-- [ ] Enable drawCursor by default, disabling if not supported. <a target="_blank"> href="http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x">http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x</a>
+- [ ] Enable drawCursor by default, disabling if not supported. <a target="_blank" href="http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x">http://forum.jquery.com/topic/jquery-support-leadingwhitespace-is-not-working-in-jquery-2-x</a>

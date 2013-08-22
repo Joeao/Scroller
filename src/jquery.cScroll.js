@@ -13,6 +13,8 @@
         start:                          function(){},                           // Happens when first move is made
         stop:                           function(){},
         step:                           function(){},
+        throttle:                       false,                                  // Requires http://benalman.com/projects/jquery-throttle-debounce-plugin/ - Increases Performance
+        throttleLimit:                  20,                                     // (ms) Rate at which movement functions are called
         drawCursor:                     false,                                  // NOT SAFE FOR IE<=8 Draws a cursor on the screen. User can style #cscroll-pointer
         showDebugging:                  false,
         triggerOnChild:                 false,                                  // If false, trigger won't be called on child
@@ -49,6 +51,12 @@
         if (! $.support.leadingWhitespace) {
             this.options.drawCursor = false;
         }*/
+
+        if($.throttle == undefined) {
+            this.options.throttle = false;
+        }
+
+        $('body').mousemove();
 
         // this.cssTranslate = this.options.useCSSTranslation && this.cssAnimationsSupported ? true : false;
 
@@ -106,16 +114,20 @@
 
         self.$el.one( self.moveTrigger, function(e) {
             if(self.options.drawCursor) {
-                $('body').css('cursor', 'none');
-                $('body').append("<div id='cscroll-cursor-box'></div>");
-                $('#cscroll-cursor-box').append("<p id='cScroll-pointer' style='position:fixed; font-size:44px; font-family: Arial, Helvetica, sans-serif; left:" + (e.clientX - 22) + "px; top:" + (e.clientY - 22) + "px;'>V</p>");
+                $('*').css('cursor', 'none');
+                $('body').append("<div id='cScroll-cursor-box' style='position:fixed; z-index:9999999; '></div>");
+                $('#cScroll-cursor-box').append("<p id='cScroll-pointer' style='position:relative; font-size:44px; font-family: Arial, Helvetica, sans-serif; left:" + (e.clientX - 22) + "px; top:" + (e.clientY - 22) + "px;'>V</p>");
             }
             self.options.initiate(e);
         });
-
-        self.$el.bind( self.moveTrigger, function(ev){
-          self.handleMove(startPosition, ev);
-        });
+        if($.throttle) {
+            self.$el.bind( self.moveTrigger, $.throttle(self.options.throttleLimit, true, function(ev) {
+                self.handleMove(startPosition, ev);
+            }));
+        } else {
+            self.handleMove(startPosition, ev);
+        }
+        
     };
 
     //  handleMove();
@@ -127,29 +139,13 @@
                 x: e.clientX,
                 y: e.clientY
             }
+
             var scrollTo = self.calculatePosition(startPosition, movePosition);
+
             self.animate(scrollTo);
 
             if(self.options.drawCursor) {
-                var angle = self.calculateAngle(startPosition, movePosition);
-
-                var rotate = 'rotate(-' + angle + 'deg)';
-                var translate = 'translateX(' + (movePosition.x - startPosition.x) + 'px) translateY(' + (movePosition.y - startPosition.y) + 'px)';
-
-                // According to http://caniuse.com/transform, only need -ms-, -webkit- and non-prefixed
-                // Moves box
-                $('body #cscroll-cursor-box').css({
-                    '-webkit-transform': translate,
-                    '-ms-transform': translate,
-                    'transform': translate
-                });
-
-                // Moves cursor rotation
-                $('body #cScroll-pointer').css({
-                    '-webkit-transform': rotate,
-                    '-ms-transform': rotate,
-                    'transform': rotate
-                });
+                self.drawCursor(startPosition, movePosition)
             }
         }
     };
@@ -175,9 +171,9 @@
                 self.$body.find('#scroller-debugging').text('');
             }
 
-            $('body #cscroll-cursor-box').remove();
+            $('body #cScroll-cursor-box').remove();
 
-            $('body').css('cursor', '');
+            $('*').css('cursor', '');
         }
     };
 
@@ -296,6 +292,30 @@
         });*/
 
         this.$el.stop();
+    };
+
+    cScroll.prototype.drawCursor = function(startPosition, movePosition) {
+        var self = this;
+
+        var angle = self.calculateAngle(startPosition, movePosition);
+
+        var rotate = 'rotate(-' + angle + 'deg)';
+        var translate = 'translateX(' + (movePosition.x - startPosition.x) + 'px) translateY(' + (movePosition.y - startPosition.y) + 'px)';
+
+        // According to http://caniuse.com/transform, only need -ms-, -webkit- and non-prefixed
+        // Moves box
+        $('body #cScroll-cursor-box').css({
+            '-webkit-transform': translate,
+            '-ms-transform': translate,
+            'transform': translate
+        });
+
+        // Moves cursor rotation
+        $('body #cScroll-pointer').css({
+            '-webkit-transform': rotate,
+            '-ms-transform': rotate,
+            'transform': rotate
+        });
     };
 
     $.fn[pluginName] = function ( options ) {

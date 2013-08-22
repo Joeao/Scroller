@@ -15,6 +15,7 @@
         step:                           function(){},
         throttle:                       false,                                  // Requires http://benalman.com/projects/jquery-throttle-debounce-plugin/ - Increases Performance
         throttleLimit:                  20,                                     // (ms) Rate at which movement functions are called
+        useOuterWidth:                  false,                                  // Scrolling will stop when outer width is reached
         drawCursor:                     false,                                  // NOT SAFE FOR IE<=8 Draws a cursor on the screen. User can style #cscroll-pointer
         showDebugging:                  false,
         triggerOnChild:                 false,                                  // If false, trigger won't be called on child
@@ -79,9 +80,7 @@
                     self.handleStart(ev);
                 }
             } else {
-                self.$el.bind( self.moveTrigger, function(ev) {
-                    self.handleMove(startPosition, ev);
-                });
+                self.handleStart(ev);
             }            
         });
 
@@ -126,13 +125,15 @@
                 self.handleMove(startPosition, ev);
             }));
         } else {
-            self.handleMove(startPosition, ev);
+            self.$el.bind( self.moveTrigger, function(ev) {
+                self.handleMove(startPosition, ev);
+            });
         }
         
     };
 
     //  handleMove();
-    //    the logic for when the move event occurs
+    //  the logic for when the move event occurs
     cScroll.prototype.handleMove = function(startPosition, e) {
         if(this.started) {
             var self = this;
@@ -211,9 +212,16 @@
             y: target.y - start.y
         }
 
-        var max = {
-            x: self.$el[0].clientWidth,
-            y: self.$el[0].clientHeight
+        if(self.options.useOuterWidth) {
+            var max = {
+                x: self.$el.outerWidth(),
+                y: self.$el.outerHeight()
+            }
+        } else {
+            var max = {
+                x: self.$el[0].clientWidth,
+                y: self.$el[0].clientHeight
+            }
         }
 
         var n; // Distance between both clicks

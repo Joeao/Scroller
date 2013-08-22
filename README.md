@@ -8,7 +8,7 @@ Why
 ---
 Because draggables or scrolling takes too long on big elements.
 
-<a href="http://www.space.com/15830-light-speed.html">Why "C" Scroll?</a> And because coming up with names is hard. 
+<a href="http://www.space.com/15830-light-speed.html">Why "C" Scroll?</a>
 
 How
 ---

@@ -1,5 +1,7 @@
 /**      
- * cScroll by JoeAO
+ * cScroll v0.0.0 (Not ready for production)
+ *
+ * @author Joe AO <https://github.com/Joeao/>
 **/
 ;(function ( $, window, undefined ) {
 
@@ -250,12 +252,12 @@
         return scrollTo;
     };
 
-    // Calculates the angle to get second point facing away from the first point
+    // Calculates the angle which would allow the second point to face away from the first point
     cScroll.prototype.calculateAngle = function(first, second) {
         // Arrow is represented by a V
         var angle = Math.atan2(second.x - first.x, second.y - first.y) * 180 / Math.PI + 360;
 
-        return angle;
+        return angle.toFixed(2);
     };
 
     cScroll.prototype.animate = function(scrollTo) {
@@ -309,10 +311,11 @@
         var angle = self.calculateAngle(startPosition, movePosition);
 
         var rotate = 'rotate(-' + angle + 'deg)';
-        var translate = 'translateX(' + (movePosition.x - startPosition.x) + 'px) translateY(' + (movePosition.y - startPosition.y) + 'px)';
+        var translate = 'translate(' + (movePosition.x - startPosition.x) + 'px, ' + (movePosition.y - startPosition.y) + 'px)';
 
         // According to http://caniuse.com/transform, only need -ms-, -webkit- and non-prefixed
         // Moves box
+        // Translating is really slow! Even with an animation frame. So is top/left. Needs replacing.
         $('body #cScroll-cursor-box').css({
             '-webkit-transform': translate,
             '-ms-transform': translate,

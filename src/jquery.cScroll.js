@@ -1,7 +1,5 @@
 /**      
- * cScroll v0.0.0 (Not ready for production)
- *
- * @author Joe AO <https://github.com/Joeao/>
+ * cScroll by JoeAO
 **/
 ;(function ( $, window, undefined ) {
 
@@ -11,12 +9,12 @@
     var pluginName = 'cScroll';
     var defaults   = {
         // Options                       
-        initiate:                       function(){},                           // Happens when startTrigger is called
-        start:                          function(){},                           // Happens when first move is made
+        initiate:                       function(){},                           // Triggered when startTrigger is called
+        start:                          function(){},                           // Triggered when first move is made
         stop:                           function(){},
         step:                           function(){},
-        throttle:                       false,                                  // Requires http://benalman.com/projects/jquery-throttle-debounce-plugin/ - Increases Performance
-        throttleLimit:                  20,                                     // (ms) Rate at which movement functions are called
+        throttle:                       false,                                  // Requires http://benalman.com/projects/jquery-throttle-debounce-plugin/ - Can improve performance
+        throttleLimit:                  20,                                     // (ms) Rate at which movement functions are called - Irrelevant if throttle = false
         useOuterWidth:                  false,                                  // Scrolling will stop when outer width is reached
         drawCursor:                     false,                                  // NOT SAFE FOR IE<=8 Draws a cursor on the screen. User can style #cscroll-pointer
         showDebugging:                  false,
@@ -32,11 +30,7 @@
    **/
     function cScroll( el, options ) {
 
-        this.name = pluginName;
-
-        // reference to our DOM object 
-        // and it's jQuery equivalent.
-        this.el  = el;
+        // reference to our jQuery object.
         this.$el = $(el);
 
         //  merge in defaults
@@ -72,7 +66,6 @@
         this.init();
     }
 
-    //  init();
     cScroll.prototype.init = function () {
         var self = this;
         // Subscribe to our start event 
@@ -97,8 +90,6 @@
     };
 
     /**
-    * handleStart()
-    *
     * Finds start position based on event
     * Binds move event and initial event
     **/
@@ -134,8 +125,7 @@
         
     };
 
-    //  handleMove();
-    //  the logic for when the move event occurs
+    // The logic for when the move event occurs
     cScroll.prototype.handleMove = function(startPosition, e) {
         if(this.started) {
             var self = this;
@@ -143,19 +133,17 @@
                 x: e.clientX,
                 y: e.clientY
             }
+            if(self.options.drawCursor) {
+                self.drawCursor(startPosition, movePosition)
+            }
 
             var scrollTo = self.calculatePosition(startPosition, movePosition);
 
             self.animate(scrollTo);
-
-            if(self.options.drawCursor) {
-                self.drawCursor(startPosition, movePosition)
-            }
         }
     };
 
-    //  handleStop();
-    //    the logic for when the stop events occur
+    // The logic for when the stop events occur
     cScroll.prototype.handleStop = function(e) {
         if(this.started) {
             var self = this;
@@ -181,39 +169,43 @@
         }
     };
 
+    /**
+     * Calculates where to navigate to, and at what speed
+     *
+     * @todo: turn if else into cases
+     * @todo: Handle element edges better
+    **/
     cScroll.prototype.calculatePosition = function(first, second) {
         var self = this;
-        /**
-         * @todo: turn if else into case
-         * @todo: Handle edges better
-        **/
 
         // Define Variables
+
+        // Frame == window
         var frame = { // x0,y0
             x: self.$window.width(),
             y: self.$window.height()
         }
-
+        // Current top & left position of element being navigated around
         var topLeft = { // Ξ0,η0
             x: -this.$el[0].offsetLeft,
             y: -this.$el[0].offsetTop
         }
-
+        // Offset of start event
         var start = { // x1,y1
             x: topLeft.x + first.x,
             y: topLeft.y + first.y
         }
-
+        // Offset of move event
         var target = { // x2,y2
             x: topLeft.x + second.x,
             y: topLeft.y + second.y
         }
-
-        var m = { // Direction
+        // Determines direction of scroll
+        var m = {
             x: target.x - start.x,
             y: target.y - start.y
         }
-
+        // Finds elements scroll limits
         if(self.options.useOuterWidth) {
             var max = {
                 x: self.$el.outerWidth(),
@@ -226,7 +218,8 @@
             }
         }
 
-        var n; // Distance between both clicks
+        // Distance between both clicks
+        var n;
         
         // Calculate position to scroll towards
         if(m.x >= 0 && m.y >= 0) {
@@ -243,6 +236,7 @@
             n = Math.min( (-topLeft.x / m.x), (-topLeft.y / m.y) );
         }
 
+        // Coordinates of where to navigate towards
         var scrollTo = { // Ξ1, η1
             x: Math.round(topLeft.x + (n * m.x)),
             y: Math.round(topLeft.y + (n * m.y)),
@@ -252,14 +246,22 @@
         return scrollTo;
     };
 
-    // Calculates the angle which would allow the second point to face away from the first point
+    /**
+     * Calculates the angle to get second point facing away from the first point
+     * This works, but could use a refactoring
+    **/
     cScroll.prototype.calculateAngle = function(first, second) {
         // Arrow is represented by a V
-        var angle = Math.atan2(second.x - first.x, second.y - first.y) * 180 / Math.PI + 360;
+        var angle = Math.atan2(second.x - first.x, second.y - first.y) * 180 / Math.PI;
+        if(angle < 0) {
+            angle += 360
+        }
 
         return angle.toFixed(2);
     };
-
+    /**
+     * Animates the element to the target position, can be stopped with stop()
+    **/
     cScroll.prototype.animate = function(scrollTo) {
         var self = this;
         /* CSS Translation
@@ -290,6 +292,7 @@
         });
     };
 
+    // Stops animations
     cScroll.prototype.stopAnimate = function() {
         /* CSS Translation
         this.$el.css({
@@ -305,6 +308,17 @@
         this.$el.stop();
     };
 
+    /**
+     * Draws a cursor on the screen, which consists of two boxes
+     * 
+     * Needs improvements, would be better if this wasn't throttled
+     * Translating position is really slow, rotate has good performance
+     *
+     * Would be cool to find a way to replace the actual cursor with an image which is generated on the fly, somehow. But not sure if possible.
+     * If possible, can get rid of rotating and translating, we'll just rotate the image when creating it, and position won't be our responsibility
+     *
+     * Temporary solution for Translate could be to get it to follow the mouse around
+    **/
     cScroll.prototype.drawCursor = function(startPosition, movePosition) {
         var self = this;
 
@@ -315,7 +329,7 @@
 
         // According to http://caniuse.com/transform, only need -ms-, -webkit- and non-prefixed
         // Moves box
-        // Translating is really slow! Even with an animation frame. So is top/left. Needs replacing.
+        // Translating is really slow! As is top/left. Needs to be replaced.
         $('body #cScroll-cursor-box').css({
             '-webkit-transform': translate,
             '-ms-transform': translate,
@@ -330,15 +344,9 @@
         });
     };
 
+    // Could this be done better? Probably.
     $.fn[pluginName] = function ( options ) {
-        return this.each(function () {
-          if (!$.data(this, 'plugin_' + pluginName)) {
-            var scrollerObj = new cScroll( this, options );
-            $.data(this, 'plugin_' + pluginName, scrollerObj);
-          }
-        });
+        new cScroll( this, options ); 
     };
-
-    $.cScroll = {};
 
 }(jQuery, window));

@@ -1,5 +1,7 @@
-/**      
- * cScroll by JoeAO
+/**
+ * cScroll v0.0.1
+ *
+ * @author JoeAO <https://github.com/Joeao/>
 **/
 ;(function ( $, window, undefined ) {
 
@@ -25,9 +27,9 @@
         stopEvents:                     'mouseup'
     };
 
-   /**
+    /**
     * Main Object
-   **/
+    **/
     function cScroll( el, options ) {
 
         // reference to our jQuery object.
@@ -140,6 +142,10 @@
             var scrollTo = self.calculatePosition(startPosition, movePosition);
 
             self.animate(scrollTo);
+
+            if(self.options.drawCursor) {
+                self.drawCursor(startPosition, movePosition)
+            }
         }
     };
 
@@ -329,7 +335,7 @@
 
         // According to http://caniuse.com/transform, only need -ms-, -webkit- and non-prefixed
         // Moves box
-        // Translating is really slow! As is top/left. Needs to be replaced.
+        // Translating is really slow! Even with an animation frame. So is top/left. Needs replacing.
         $('body #cScroll-cursor-box').css({
             '-webkit-transform': translate,
             '-ms-transform': translate,
